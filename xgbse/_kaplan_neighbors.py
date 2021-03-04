@@ -390,7 +390,11 @@ class XGBSEKaplanTree(XGBSEBaseEstimator):
         dtrain = convert_data_to_xgb_format(X, y, self.xgb_params["objective"])
 
         # training XGB
-        self.bst = xgb.train(self.xgb_params, dtrain, num_boost_round=1, **xgb_kwargs)
+        # take the same values from "xgboost_wrapper_simplified()"
+        num_boost_round = 50 # #PETTERI from old code, makes computation last longer of course
+        # early_stopping_rounds = 50 # #PETTERI from old code, would require test/val split
+        self.bst = xgb.train(self.xgb_params, dtrain, num_boost_round=num_boost_round, **xgb_kwargs)
+        self.best_loss = self.bst.best_score # #PETTERI we want the best nloglik for each of the bootstrap subsets
         self.feature_importances_ = self.bst.get_score()
 
         # getting leaves
